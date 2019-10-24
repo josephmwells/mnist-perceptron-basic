@@ -1,5 +1,5 @@
 import numpy as np
-
+# TODO Fix weights not updating properly
 
 class Perceptron:
     def __init__(self, inputs, targets):
