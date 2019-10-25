@@ -9,27 +9,36 @@ class Perceptron:
 
     def train(self, learning_rate, iterations):
         accuracy = np.zeros(iterations)
+
+        # Start epoch
         for e in range(iterations):
             positives = 0
             negatives = 0
             print("Start of Epoch: ", e)
             print("Learning Rate: ", learning_rate)
 
+            # Start enumerating through data-set
             for k, inputs in enumerate(self.inputs):
                 activations = np.dot(inputs, self.weights)
-                result = np.where(activations == np.amax(activations))
+                result = np.where(activations == np.max(activations))
+                # print(result[0])
+                # print(self.targets[k])
+                # print("End")
 
-                targets = np.zeros(10, dtype=float)
-                targets[result[0]] = 1.
+                t_targets = np.zeros(10, dtype=float)
+                t_targets[result[0]] = 1.
 
-                if result[0] != self.targets[k]:
-                    activations = np.where(activations > 0, 1, 0)
-                    reshape_inputs = np.reshape(inputs, (-1, 1))
-                    reshape_activations = np.reshape(activations-targets, (1, -1))
-                    self.weights -= learning_rate*np.dot(reshape_inputs, reshape_activations)
-                    negatives += 1
-                else:
+                # if results don't match the target, update weights
+                if result[0] == self.targets[k]:
                     positives += 1
+                else:
+                    y_activations = np.where(activations > 0, 1, 0)
+                    reshape_inputs = np.reshape(inputs, (-1, 1))
+                    reshape_activations = np.reshape(t_targets - y_activations, (1, -1))
+                    self.weights = self.weights + learning_rate * np.dot(reshape_inputs, reshape_activations)
+                    negatives += 1
+
+            # Compute accuracy and output results
             accuracy[e] = positives / (positives+negatives)
             print("End of Epoch: ", e)
             print("Total: ", positives+negatives)
@@ -60,7 +69,7 @@ if __name__ == "__main__":
     csv_file = "mnist_train.csv"
 
     print("Loading csv file . . . ")
-    data = np.loadtxt(csv_file, delimiter=',', max_rows=200)
+    data = np.loadtxt(csv_file, delimiter=',', max_rows=500)
     print("Complete")
 
     targets = np.asarray(data[:, :1], dtype='float')
@@ -69,5 +78,6 @@ if __name__ == "__main__":
     inputs = np.concatenate((np.ones((np.shape(inputs)[0], 1)), inputs), axis=1)
 
     pcn = Perceptron(inputs, targets)
+
+    pcn.train(0.01, 70)
     # pcn.test()
-    pcn.train(0.01, 10)
